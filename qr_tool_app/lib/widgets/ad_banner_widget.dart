@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../core/localization/app_strings.dart';
 
 /// AdBannerWidget - Tətbiqin dizaynına uyğunlaşdırılmış zərif və funksional reklam banneri.
 /// Google AdMob və ya daxili sponsor bannerləri üçün tam hazırdır.
@@ -20,26 +21,6 @@ class AdBannerWidget extends StatefulWidget {
 class _AdBannerWidgetState extends State<AdBannerWidget> {
   bool _isVisible = true;
 
-  // Nümunə sponsor / təşviqat elanları (AdMob qoşulana qədər və ya alternativ olaraq nümayiş etdirilir)
-  final List<Map<String, String>> _adCampaigns = [
-    {
-      'title': 'QR & Barkod Təhlükəsizliyi',
-      'subtitle': 'Zərərli proqramlardan və saxta linklərdən 100% qorunun.',
-      'cta': 'Ətraflı',
-      'url': 'https://flutter.dev',
-      'icon': 'security',
-    },
-    {
-      'title': 'Premium QR Funksiyaları',
-      'subtitle': 'Yüksək dəqiqlikli vektor SVG və PNG ixracı.',
-      'cta': 'Kəşf et',
-      'url': 'https://flutter.dev',
-      'icon': 'star',
-    },
-  ];
-
-  final int _currentAdIndex = 0;
-
   @override
   Widget build(BuildContext context) {
     if (!_isVisible) {
@@ -48,7 +29,12 @@ class _AdBannerWidgetState extends State<AdBannerWidget> {
 
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final ad = _adCampaigns[_currentAdIndex];
+
+    final title = context.tr('ad_title_security');
+    final subtitle = context.tr('ad_sub_security');
+    final cta = context.tr('ad_cta_learn');
+    final tag = context.tr('ad_tag');
+    final tooltip = context.tr('ad_close_tooltip');
 
     return Container(
       margin: widget.margin ?? const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
@@ -84,12 +70,10 @@ class _AdBannerWidgetState extends State<AdBannerWidget> {
         child: InkWell(
           borderRadius: BorderRadius.circular(14),
           onTap: () async {
-            final url = ad['url'];
-            if (url != null) {
-              final uri = Uri.parse(url);
-              if (await canLaunchUrl(uri)) {
-                await launchUrl(uri, mode: LaunchMode.externalApplication);
-              }
+            const url = 'https://flutter.dev';
+            final uri = Uri.parse(url);
+            if (await canLaunchUrl(uri)) {
+              await launchUrl(uri, mode: LaunchMode.externalApplication);
             }
           },
           child: Padding(
@@ -108,9 +92,7 @@ class _AdBannerWidgetState extends State<AdBannerWidget> {
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Icon(
-                        ad['icon'] == 'security'
-                            ? Icons.verified_user_rounded
-                            : Icons.auto_awesome_rounded,
+                        Icons.verified_user_rounded,
                         color: theme.colorScheme.primary,
                         size: 24,
                       ),
@@ -134,9 +116,9 @@ class _AdBannerWidgetState extends State<AdBannerWidget> {
                               color: Colors.amber.shade700,
                               borderRadius: BorderRadius.circular(4),
                             ),
-                            child: const Text(
-                              'REKLAM',
-                              style: TextStyle(
+                            child: Text(
+                              tag,
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 9,
                                 fontWeight: FontWeight.w900,
@@ -147,7 +129,7 @@ class _AdBannerWidgetState extends State<AdBannerWidget> {
                           const SizedBox(width: 6),
                           Expanded(
                             child: Text(
-                              ad['title'] ?? '',
+                              title,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
@@ -160,7 +142,7 @@ class _AdBannerWidgetState extends State<AdBannerWidget> {
                       ),
                       const SizedBox(height: 3),
                       Text(
-                        ad['subtitle'] ?? '',
+                        subtitle,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
@@ -182,7 +164,7 @@ class _AdBannerWidgetState extends State<AdBannerWidget> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    ad['cta'] ?? 'Aç',
+                    cta,
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 11,
@@ -198,7 +180,7 @@ class _AdBannerWidgetState extends State<AdBannerWidget> {
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
                   color: Colors.grey,
-                  tooltip: 'Reklamı gizlət',
+                  tooltip: tooltip,
                   onPressed: () {
                     setState(() {
                       _isVisible = false;

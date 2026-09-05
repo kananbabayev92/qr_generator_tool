@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../core/localization/app_strings.dart';
 import '../models/qr_item.dart';
 import 'security_service.dart';
 
@@ -37,7 +38,7 @@ class ActionHelper {
           final uri = Uri.tryParse(data);
           if (uri == null || (!uri.isScheme('http') && !uri.isScheme('https'))) {
             if (context.mounted) {
-              _showSnackBar(context, 'Təhlükəsizlik səbəbilə yalnız HTTPS/HTTP linkləri açıla bilər');
+              _showSnackBar(context, context.tr('action_only_https'));
             }
             return;
           }
@@ -45,7 +46,7 @@ class ActionHelper {
             await launchUrl(uri, mode: LaunchMode.externalApplication);
           } else {
             if (context.mounted) {
-              _showSnackBar(context, 'Link açıla bilmədi');
+              _showSnackBar(context, context.tr('action_link_error'));
             }
           }
           break;
@@ -56,7 +57,7 @@ class ActionHelper {
             await launchUrl(uri);
           } else {
             if (context.mounted) {
-              _showSnackBar(context, 'Zəng edilə bilmədi');
+              _showSnackBar(context, context.tr('action_call_error'));
             }
           }
           break;
@@ -68,7 +69,7 @@ class ActionHelper {
             await launchUrl(uri);
           } else {
             if (context.mounted) {
-              _showSnackBar(context, 'Email proqramı tapılmadı');
+              _showSnackBar(context, context.tr('action_email_error'));
             }
           }
           break;
@@ -81,7 +82,7 @@ class ActionHelper {
             await launchUrl(uri);
           } else {
             if (context.mounted) {
-              _showSnackBar(context, 'SMS proqramı tapılmadı');
+              _showSnackBar(context, context.tr('action_sms_error'));
             }
           }
           break;
@@ -92,10 +93,10 @@ class ActionHelper {
           if (context.mounted) {
             if (password.isNotEmpty) {
               await copyToClipboard(context, password,
-                  customMessage: 'Wi-Fi şifrəsi kopyalandı!');
+                  customMessage: context.tr('action_wifi_copied'));
             } else {
               await copyToClipboard(context, data,
-                  customMessage: 'Wi-Fi məlumatı kopyalandı!');
+                  customMessage: context.tr('action_wifi_info_copied'));
             }
           }
           break;
@@ -108,7 +109,7 @@ class ActionHelper {
       }
     } catch (e) {
       if (context.mounted) {
-        _showSnackBar(context, 'Əməliyyat zamanı xəta: $e');
+        _showSnackBar(context, 'Error: $e');
       }
     }
   }
@@ -133,10 +134,10 @@ class ActionHelper {
 
   /// Mətni buferə kopyalamaq
   static Future<void> copyToClipboard(BuildContext context, String text,
-      {String customMessage = 'Mətn kopyalandı!'}) async {
+      {String? customMessage}) async {
     await Clipboard.setData(ClipboardData(text: text));
     if (context.mounted) {
-      _showSnackBar(context, customMessage);
+      _showSnackBar(context, customMessage ?? context.tr('action_copied'));
     }
   }
 
@@ -184,14 +185,14 @@ class ActionHelper {
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
               ),
-              child: const Row(
+              child: Row(
                 children: [
-                  Icon(Icons.warning_amber_rounded, color: Colors.red, size: 20),
-                  SizedBox(width: 8),
+                  const Icon(Icons.warning_amber_rounded, color: Colors.red, size: 20),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Tətbiqin təhlükəsizlik qaydalarına əsasən icra qadağan edildi.',
-                      style: TextStyle(fontSize: 12, color: Colors.red),
+                      context.tr('sec_blocked_dialog_rule'),
+                      style: const TextStyle(fontSize: 12, color: Colors.red),
                     ),
                   ),
                 ],
@@ -203,7 +204,7 @@ class ActionHelper {
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
             onPressed: () => Navigator.pop(context),
-            child: const Text('Anladım'),
+            child: Text(context.tr('sec_understood')),
           ),
         ],
       ),
@@ -217,9 +218,9 @@ class ActionHelper {
       context: context,
       builder: (context) => AlertDialog(
         icon: const Icon(Icons.shield_outlined, color: Colors.amber, size: 44),
-        title: const Text(
-          'Şübhəli Bağlantı Xəbərdarlığı',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          context.tr('sec_suspicious_dialog_title'),
+          style: const TextStyle(fontWeight: FontWeight.bold),
           textAlign: TextAlign.center,
         ),
         content: Column(
@@ -254,12 +255,12 @@ class ActionHelper {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Geri Qayıt'),
+            child: Text(context.tr('sec_suspicious_dialog_btn_back')),
           ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Colors.amber.shade800),
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Yenə də aç'),
+            child: Text(context.tr('sec_suspicious_dialog_btn_proceed')),
           ),
         ],
       ),

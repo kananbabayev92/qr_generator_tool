@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/localization/app_strings.dart';
 import '../models/qr_item.dart';
 import '../services/action_helper.dart';
 
@@ -38,23 +39,23 @@ class QrCard extends StatelessWidget {
     }
   }
 
-  // Növün azərbaycanca adı
-  String _getTypeLabel(QrType type) {
+  // Növün adı
+  String _getTypeLabel(BuildContext context, QrType type) {
     switch (type) {
       case QrType.url:
-        return 'Veb Link';
+        return context.tr('type_url');
       case QrType.whatsapp:
-        return 'WhatsApp';
+        return context.tr('type_whatsapp');
       case QrType.wifi:
-        return 'Wi-Fi';
+        return context.tr('type_wifi');
       case QrType.email:
-        return 'Email';
+        return context.tr('type_email');
       case QrType.phone:
-        return 'Telefon';
+        return context.tr('type_phone');
       case QrType.sms:
-        return 'SMS';
+        return context.tr('type_sms');
       case QrType.text:
-        return 'Mətn';
+        return context.tr('type_text');
     }
   }
 
@@ -122,7 +123,7 @@ class QrCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
-                            _getTypeLabel(item.type),
+                            _getTypeLabel(context, item.type),
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.bold,
@@ -134,7 +135,9 @@ class QrCard extends StatelessWidget {
                         // Skan olunub yoxsa Yaradılıb etiketi
                         Flexible(
                           child: Text(
-                            item.isScanned ? '• Skan edilib' : '• Yaradılıb',
+                            item.isScanned
+                                ? context.tr('history_badge_scanned')
+                                : context.tr('history_badge_generated'),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
@@ -179,7 +182,7 @@ class QrCard extends StatelessWidget {
                       color: item.isFavorite ? Colors.amber : Colors.grey,
                       size: 22,
                     ),
-                    tooltip: 'Sevimlilər',
+                    tooltip: context.tr('history_filter_favorites'),
                     onPressed: onFavoriteToggle,
                   ),
                   PopupMenuButton<String>(
@@ -199,44 +202,44 @@ class QrCard extends StatelessWidget {
                       }
                     },
                     itemBuilder: (context) => [
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'open',
                         child: Row(
                           children: [
-                            Icon(Icons.launch_rounded, size: 18),
-                            SizedBox(width: 8),
-                            Text('Aç / İcra et'),
+                            const Icon(Icons.launch_rounded, size: 18),
+                            const SizedBox(width: 8),
+                            Text(context.tr('action_execute')),
                           ],
                         ),
                       ),
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'copy',
                         child: Row(
                           children: [
-                            Icon(Icons.copy_rounded, size: 18),
-                            SizedBox(width: 8),
-                            Text('Kopyala'),
+                            const Icon(Icons.copy_rounded, size: 18),
+                            const SizedBox(width: 8),
+                            Text(context.tr('scanner_copy')),
                           ],
                         ),
                       ),
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'share',
                         child: Row(
                           children: [
-                            Icon(Icons.share_rounded, size: 18),
-                            SizedBox(width: 8),
-                            Text('Paylaş'),
+                            const Icon(Icons.share_rounded, size: 18),
+                            const SizedBox(width: 8),
+                            Text(context.tr('scanner_share')),
                           ],
                         ),
                       ),
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'delete',
                         child: Row(
                           children: [
-                            Icon(Icons.delete_outline_rounded,
+                            const Icon(Icons.delete_outline_rounded,
                                 size: 18, color: Colors.red),
-                            SizedBox(width: 8),
-                            Text('Sil', style: TextStyle(color: Colors.red)),
+                            const SizedBox(width: 8),
+                            Text(context.tr('history_delete'), style: const TextStyle(color: Colors.red)),
                           ],
                         ),
                       ),

@@ -5,6 +5,7 @@ import 'package:flutter/rendering.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
+import '../../core/localization/app_strings.dart';
 import '../../models/qr_item.dart';
 import '../../services/action_helper.dart';
 import '../../services/security_service.dart';
@@ -171,7 +172,7 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
               const Icon(Icons.gpp_bad_rounded, color: Colors.white),
               const SizedBox(width: 8),
               Expanded(
-                child: Text('Təhlükəsizlik Bloklaması: ${securityResult.title} yadda saxlanıla bilməz!'),
+                child: Text(context.tr('gen_blocked_save_msg')),
               ),
             ],
           ),
@@ -194,16 +195,16 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
     widget.storageService.addItem(item);
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
+      SnackBar(
         content: Row(
           children: [
-            Icon(Icons.check_circle_rounded, color: Colors.white),
-            SizedBox(width: 8),
-            Text('QR Kod tarixçəyə əlavə edildi!'),
+            const Icon(Icons.check_circle_rounded, color: Colors.white),
+            const SizedBox(width: 8),
+            Text(context.tr('gen_saved_success')),
           ],
         ),
         backgroundColor: Colors.green,
-        duration: Duration(seconds: 2),
+        duration: const Duration(seconds: 2),
       ),
     );
   }
@@ -216,7 +217,7 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
     if (securityResult.isBlocked) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Zərərli məzmun təhlükəsizlik səbəbilə paylaşıla bilməz: ${securityResult.title}'),
+          content: Text('${context.tr('gen_blocked_share_msg')}${securityResult.title}'),
           backgroundColor: Colors.red,
         ),
       );
@@ -240,13 +241,13 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
       await SharePlus.instance.share(
         ShareParams(
           files: [XFile(file.path)],
-          text: 'QR Kod: $_generatedData',
+          text: 'QR: $_generatedData',
         ),
       );
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Şəkil paylaşılan zaman xəta: $e')),
+          SnackBar(content: Text('Error: $e')),
         );
       }
     }
@@ -277,14 +278,14 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('QR Generator'),
+        title: Text(context.tr('gen_title')),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Növ seçimi üçün Chiple-lər
+            // Növ seçimi üçün Chip-lər
             _buildTypeSelector(),
             const SizedBox(height: 20),
 
@@ -339,14 +340,14 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
                             color: Colors.red.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          child: const Row(
+                          child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.shield_outlined, color: Colors.red, size: 16),
-                              SizedBox(width: 6),
+                              const Icon(Icons.shield_outlined, color: Colors.red, size: 16),
+                              const SizedBox(width: 6),
                               Text(
-                                'QR kodun yaradılması bloklandı',
-                                style: TextStyle(
+                                context.tr('gen_blocked_title'),
+                                style: const TextStyle(
                                   color: Colors.red,
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
@@ -390,8 +391,8 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
                           const SizedBox(width: 6),
                           Text(
                             audit.isSuspicious
-                                ? 'Şübhəli Bağlantı (Diqqətli olun)'
-                                : 'Təhlükəsizlik Yoxlanışı: Təmiz',
+                                ? context.tr('gen_status_suspicious')
+                                : context.tr('gen_status_clean'),
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
@@ -465,18 +466,18 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
                         ElevatedButton.icon(
                           onPressed: _saveToHistory,
                           icon: const Icon(Icons.bookmark_add_rounded, size: 18),
-                          label: const Text('Yadda saxla'),
+                          label: Text(context.tr('gen_save')),
                         ),
                         FilledButton.tonalIcon(
                           onPressed: _shareAsImage,
                           icon: const Icon(Icons.image_rounded, size: 18),
-                          label: const Text('Şəkli paylaş'),
+                          label: Text(context.tr('gen_share_img')),
                         ),
                         IconButton.filledTonal(
                           onPressed: () =>
                               ActionHelper.copyToClipboard(context, _generatedData),
                           icon: const Icon(Icons.copy_rounded, size: 18),
-                          tooltip: 'Mətni kopyala',
+                          tooltip: context.tr('scanner_copy'),
                         ),
                       ],
                     ),
@@ -503,7 +504,7 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      'QR kod yaratmaq üçün yuxarıdakı xananı doldurun',
+                      context.tr('gen_enter_details'),
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 14,
@@ -526,9 +527,9 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'QR Kodun Rəngi:',
-          style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+        Text(
+          context.tr('gen_color_picker'),
+          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
         Row(
@@ -575,13 +576,13 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
   // Növ seçimi vidceti
   Widget _buildTypeSelector() {
     final types = [
-      {'type': QrType.text, 'label': 'Mətn', 'icon': Icons.text_fields_rounded},
-      {'type': QrType.url, 'label': 'Veb Sayt', 'icon': Icons.link_rounded},
-      {'type': QrType.whatsapp, 'label': 'WhatsApp', 'icon': Icons.chat_rounded},
-      {'type': QrType.wifi, 'label': 'Wi-Fi', 'icon': Icons.wifi_rounded},
-      {'type': QrType.phone, 'label': 'Telefon', 'icon': Icons.phone_rounded},
-      {'type': QrType.email, 'label': 'Email', 'icon': Icons.email_rounded},
-      {'type': QrType.sms, 'label': 'SMS', 'icon': Icons.sms_rounded},
+      {'type': QrType.text, 'label': context.tr('type_text'), 'icon': Icons.text_fields_rounded},
+      {'type': QrType.url, 'label': context.tr('type_url'), 'icon': Icons.link_rounded},
+      {'type': QrType.whatsapp, 'label': context.tr('type_whatsapp'), 'icon': Icons.chat_rounded},
+      {'type': QrType.wifi, 'label': context.tr('type_wifi'), 'icon': Icons.wifi_rounded},
+      {'type': QrType.phone, 'label': context.tr('type_phone'), 'icon': Icons.phone_rounded},
+      {'type': QrType.email, 'label': context.tr('type_email'), 'icon': Icons.email_rounded},
+      {'type': QrType.sms, 'label': context.tr('type_sms'), 'icon': Icons.sms_rounded},
     ];
 
     return SingleChildScrollView(
@@ -630,10 +631,10 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
           controller: _textController,
           maxLines: 3,
           maxLength: SecurityService.maxSafeLength,
-          decoration: const InputDecoration(
-            labelText: 'Mətn daxil edin',
-            hintText: 'Məsələn: Salam, bu mənim ilk QR kodumdur!',
-            prefixIcon: Icon(Icons.edit_note_rounded),
+          decoration: InputDecoration(
+            labelText: context.tr('gen_input_text_label'),
+            hintText: context.tr('gen_input_text_hint'),
+            prefixIcon: const Icon(Icons.edit_note_rounded),
           ),
         );
 
@@ -642,10 +643,10 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
           controller: _textController,
           keyboardType: TextInputType.url,
           maxLength: SecurityService.maxSafeLength,
-          decoration: const InputDecoration(
-            labelText: 'Veb sayt ünvanı',
-            hintText: 'https://flutter.dev',
-            prefixIcon: Icon(Icons.link_rounded),
+          decoration: InputDecoration(
+            labelText: context.tr('gen_input_url_label'),
+            hintText: context.tr('gen_input_url_hint'),
+            prefixIcon: const Icon(Icons.link_rounded),
           ),
         );
 
@@ -655,20 +656,20 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
             TextField(
               controller: _waPhoneController,
               keyboardType: TextInputType.phone,
-              decoration: const InputDecoration(
-                labelText: 'WhatsApp Nömrəsi (Ölkə kodu ilə)',
-                hintText: '994501234567',
-                prefixIcon: Icon(Icons.phone_android_rounded),
+              decoration: InputDecoration(
+                labelText: context.tr('gen_input_wa_phone'),
+                hintText: '+1234567890',
+                prefixIcon: const Icon(Icons.phone_android_rounded),
               ),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: _waMessageController,
               maxLines: 2,
-              decoration: const InputDecoration(
-                labelText: 'Hazır mesaj (İstəyə görə)',
-                hintText: 'Salam! Sizin elanla bağlı yazıram...',
-                prefixIcon: Icon(Icons.chat_bubble_outline_rounded),
+              decoration: InputDecoration(
+                labelText: context.tr('gen_input_wa_msg'),
+                hintText: context.tr('gen_input_wa_msg_hint'),
+                prefixIcon: const Icon(Icons.chat_bubble_outline_rounded),
               ),
             ),
           ],
@@ -679,32 +680,32 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
           children: [
             TextField(
               controller: _ssidController,
-              decoration: const InputDecoration(
-                labelText: 'Şəbəkə adı (SSID)',
-                hintText: 'Ev Wi-Fi',
-                prefixIcon: Icon(Icons.wifi_rounded),
+              decoration: InputDecoration(
+                labelText: context.tr('gen_input_wifi_ssid'),
+                hintText: 'Home Wi-Fi',
+                prefixIcon: const Icon(Icons.wifi_rounded),
               ),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: _passwordController,
               obscureText: true,
-              decoration: const InputDecoration(
-                labelText: 'Şifrə',
-                prefixIcon: Icon(Icons.lock_outline_rounded),
+              decoration: InputDecoration(
+                labelText: context.tr('gen_input_wifi_pass'),
+                prefixIcon: const Icon(Icons.lock_outline_rounded),
               ),
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
               initialValue: _wifiSecurity,
-              decoration: const InputDecoration(
-                labelText: 'Təhlükəsizlik növü',
-                prefixIcon: Icon(Icons.security_rounded),
+              decoration: InputDecoration(
+                labelText: context.tr('gen_input_wifi_security'),
+                prefixIcon: const Icon(Icons.security_rounded),
               ),
-              items: const [
-                DropdownMenuItem(value: 'WPA', child: Text('WPA / WPA2')),
-                DropdownMenuItem(value: 'WEP', child: Text('WEP')),
-                DropdownMenuItem(value: 'nopass', child: Text('Açıq (Şifrəsiz)')),
+              items: [
+                const DropdownMenuItem(value: 'WPA', child: Text('WPA / WPA2')),
+                const DropdownMenuItem(value: 'WEP', child: Text('WEP')),
+                DropdownMenuItem(value: 'nopass', child: Text(context.tr('gen_wifi_open'))),
               ],
               onChanged: (val) {
                 if (val != null) {
@@ -722,10 +723,10 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
         return TextField(
           controller: _phoneController,
           keyboardType: TextInputType.phone,
-          decoration: const InputDecoration(
-            labelText: 'Telefon nömrəsi',
-            hintText: '+994 50 123 45 67',
-            prefixIcon: Icon(Icons.phone_rounded),
+          decoration: InputDecoration(
+            labelText: context.tr('gen_input_phone'),
+            hintText: '+1 234 567 8900',
+            prefixIcon: const Icon(Icons.phone_rounded),
           ),
         );
 
@@ -735,19 +736,19 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
             TextField(
               controller: _emailController,
               keyboardType: TextInputType.emailAddress,
-              decoration: const InputDecoration(
-                labelText: 'Email ünvanı',
-                hintText: 'misal@gmail.com',
-                prefixIcon: Icon(Icons.email_rounded),
+              decoration: InputDecoration(
+                labelText: context.tr('gen_input_email'),
+                hintText: 'name@example.com',
+                prefixIcon: const Icon(Icons.email_rounded),
               ),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: _emailSubjectController,
-              decoration: const InputDecoration(
-                labelText: 'Mövzu (Subject)',
-                hintText: 'İş təklifi',
-                prefixIcon: Icon(Icons.subject_rounded),
+              decoration: InputDecoration(
+                labelText: context.tr('gen_input_subject'),
+                hintText: 'Inquiry',
+                prefixIcon: const Icon(Icons.subject_rounded),
               ),
             ),
           ],
@@ -759,20 +760,20 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
             TextField(
               controller: _phoneController,
               keyboardType: TextInputType.phone,
-              decoration: const InputDecoration(
-                labelText: 'Telefon nömrəsi',
-                hintText: '+994 50 123 45 67',
-                prefixIcon: Icon(Icons.phone_rounded),
+              decoration: InputDecoration(
+                labelText: context.tr('gen_input_phone'),
+                hintText: '+1 234 567 8900',
+                prefixIcon: const Icon(Icons.phone_rounded),
               ),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: _smsController,
               maxLines: 2,
-              decoration: const InputDecoration(
-                labelText: 'SMS mesajı',
-                hintText: 'Mesajınızı bura yazın...',
-                prefixIcon: Icon(Icons.message_rounded),
+              decoration: InputDecoration(
+                labelText: context.tr('gen_input_sms'),
+                hintText: 'Message text...',
+                prefixIcon: const Icon(Icons.message_rounded),
               ),
             ),
           ],

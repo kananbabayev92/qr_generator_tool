@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import '../../core/localization/app_strings.dart';
 import '../../models/qr_item.dart';
 import '../../services/action_helper.dart';
 import '../../services/storage_service.dart';
@@ -20,7 +21,7 @@ class HistoryScreen extends StatefulWidget {
 }
 
 class _HistoryScreenState extends State<HistoryScreen> {
-  int _selectedFilterIndex = 0; // 0: Hamısı, 1: Skan edilənlər, 2: Yaradılanlar, 3: Sevimlilər
+  int _selectedFilterIndex = 0; // 0: All, 1: Scanned, 2: Generated, 3: Favorites
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
 
@@ -35,14 +36,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Tarixçəni təmizlə?'),
-        content: const Text(
-          'Bütün saxlanılmış QR kodlar silinəcək. Bu əməliyyatı geri qaytarmaq mümkün deyil.',
-        ),
+        title: Text(context.tr('history_clear_dialog_title')),
+        content: Text(context.tr('history_clear_dialog_desc')),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('İmtina'),
+            child: Text(context.tr('history_cancel')),
           ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
@@ -50,14 +49,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
               widget.storageService.clearAll();
               Navigator.pop(context);
             },
-            child: const Text('Sil'),
+            child: Text(context.tr('history_delete')),
           ),
         ],
       ),
     );
   }
 
-  // Elementə toxunanda detallı baxış pəncərəsi (Bottom Sheet)
   // Elementə toxunanda detallı baxış pəncərəsi (Bottom Sheet)
   void _showItemDetailSheet(BuildContext context, QrItem item) {
     showModalBottomSheet(
@@ -152,7 +150,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       ActionHelper.performPrimaryAction(context, item);
                     },
                     icon: const Icon(Icons.launch_rounded),
-                    label: const Text('İcra et / Aç'),
+                    label: Text(context.tr('action_execute')),
                   ),
                   const SizedBox(height: 10),
 
@@ -166,7 +164,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           onPressed: () =>
                               ActionHelper.copyToClipboard(context, item.data),
                           icon: const Icon(Icons.copy_rounded, size: 18),
-                          label: const Text('Kopyala'),
+                          label: Text(context.tr('scanner_copy')),
                         ),
                       ),
                       const SizedBox(width: 10),
@@ -177,7 +175,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           ),
                           onPressed: () => ActionHelper.shareText(item.data),
                           icon: const Icon(Icons.share_rounded, size: 18),
-                          label: const Text('Paylaş'),
+                          label: Text(context.tr('scanner_share')),
                         ),
                       ),
                     ],
@@ -196,11 +194,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tarixçə'),
+        title: Text(context.tr('history_title')),
         actions: [
           IconButton(
             icon: const Icon(Icons.delete_sweep_outlined),
-            tooltip: 'Tarixçəni təmizlə',
+            tooltip: context.tr('history_clear_all_tooltip'),
             onPressed: _confirmClearAll,
           ),
         ],
@@ -240,7 +238,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 child: TextField(
                   controller: _searchController,
                   decoration: InputDecoration(
-                    hintText: 'Tarixçədə axtar...',
+                    hintText: context.tr('history_search_hint'),
                     prefixIcon: const Icon(Icons.search_rounded),
                     suffixIcon: _searchQuery.isNotEmpty
                         ? IconButton(
@@ -268,10 +266,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                 child: Row(
                   children: [
-                    _buildFilterChip(0, 'Hamısı'),
-                    _buildFilterChip(1, 'Skan edilənlər'),
-                    _buildFilterChip(2, 'Yaradılanlar'),
-                    _buildFilterChip(3, 'Sevimlilər'),
+                    _buildFilterChip(0, context.tr('history_filter_all')),
+                    _buildFilterChip(1, context.tr('history_filter_scanned')),
+                    _buildFilterChip(2, context.tr('history_filter_generated')),
+                    _buildFilterChip(3, context.tr('history_filter_favorites')),
                   ],
                 ),
               ),
@@ -300,9 +298,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
                               widget.storageService.deleteItem(item.id);
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: const Text('Element silindi'),
+                                  content: Text(context.tr('history_item_deleted')),
                                   action: SnackBarAction(
-                                    label: 'Geri qaytar',
+                                    label: context.tr('history_undo'),
                                     onPressed: () {
                                       widget.storageService.addItem(item);
                                     },
@@ -366,8 +364,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
           const SizedBox(height: 12),
           Text(
             _searchQuery.isNotEmpty
-                ? 'Heç bir nəticə tapılmadı'
-                : 'Hələ heç bir QR kod yoxdur',
+                ? context.tr('history_empty_search_title')
+                : context.tr('history_empty_title'),
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
@@ -377,8 +375,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
           const SizedBox(height: 4),
           Text(
             _searchQuery.isNotEmpty
-                ? 'Fərqli axtarış sözü yoxlayın'
-                : 'QR kod skan edin və ya yeni QR kod yaradın',
+                ? context.tr('history_empty_search_subtitle')
+                : context.tr('history_empty_subtitle'),
             style: TextStyle(
               fontSize: 13,
               color: Colors.grey.shade500,

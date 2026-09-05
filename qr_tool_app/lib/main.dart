@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'core/localization/app_strings.dart';
 import 'core/theme/app_theme.dart';
 import 'screens/splash/splash_screen.dart';
 import 'services/storage_service.dart';
@@ -12,27 +13,34 @@ void main() async {
   final storageService = StorageService();
   await storageService.init();
 
-  // Saxlanılmış tema rejimini oxuyuruq
+  // Saxlanılmış tema və dil tənzimləmələrini oxuyuruq
   final prefs = await SharedPreferences.getInstance();
   final savedThemeIndex = prefs.getInt('app_theme_mode') ?? 0;
   final initialThemeMode = ThemeMode.values[savedThemeIndex];
 
+  // Qlobal default dil: İngilis dili ('en')
+  final savedLocale = prefs.getString('app_language_code') ?? 'en';
+  AppStrings.setLocale(savedLocale);
+
   runApp(QrToolApp(
     storageService: storageService,
     initialThemeMode: initialThemeMode,
+    initialLocale: savedLocale,
   ));
 }
 
 /// QrToolApp - Tətbiqin kök (Root) vidceti.
-/// Burada dinamik tema dəyişməsi, rənglər və açılış ekranı idarə olunur.
+/// Burada dinamik tema dəyişməsi, dillər və açılış ekranı idarə olunur.
 class QrToolApp extends StatefulWidget {
   final StorageService storageService;
   final ThemeMode initialThemeMode;
+  final String initialLocale;
 
   const QrToolApp({
     super.key,
     required this.storageService,
     this.initialThemeMode = ThemeMode.system,
+    this.initialLocale = 'en',
   });
 
   @override
@@ -41,11 +49,14 @@ class QrToolApp extends StatefulWidget {
 
 class _QrToolAppState extends State<QrToolApp> {
   late ThemeMode _themeMode;
+  late String _currentLocale;
 
   @override
   void initState() {
     super.initState();
     _themeMode = widget.initialThemeMode;
+    _currentLocale = widget.initialLocale;
+    AppStrings.setLocale(_currentLocale);
   }
 
   void _changeThemeMode(ThemeMode mode) async {
@@ -54,6 +65,15 @@ class _QrToolAppState extends State<QrToolApp> {
     });
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('app_theme_mode', mode.index);
+  }
+
+  void _changeLanguage(String langCode) async {
+    setState(() {
+      _currentLocale = langCode;
+      AppStrings.setLocale(langCode);
+    });
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('app_language_code', langCode);
   }
 
   @override
@@ -68,6 +88,8 @@ class _QrToolAppState extends State<QrToolApp> {
         storageService: widget.storageService,
         currentThemeMode: _themeMode,
         onThemeModeChanged: _changeThemeMode,
+        currentLocale: _currentLocale,
+        onLocaleChanged: _changeLanguage,
       ),
     );
   }

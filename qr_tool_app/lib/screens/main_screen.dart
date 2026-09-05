@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/localization/app_strings.dart';
 import '../services/storage_service.dart';
 import '../widgets/ad_banner_widget.dart';
 import 'generator/generator_screen.dart';
@@ -16,12 +17,16 @@ class MainScreen extends StatefulWidget {
   final StorageService storageService;
   final ValueChanged<ThemeMode>? onThemeModeChanged;
   final ThemeMode currentThemeMode;
+  final String currentLocale;
+  final ValueChanged<String>? onLocaleChanged;
 
   const MainScreen({
     super.key,
     required this.storageService,
     this.onThemeModeChanged,
     this.currentThemeMode = ThemeMode.system,
+    this.currentLocale = 'en',
+    this.onLocaleChanged,
   });
 
   @override
@@ -41,6 +46,8 @@ class _MainScreenState extends State<MainScreen> {
         storageService: widget.storageService,
         onThemeModeChanged: widget.onThemeModeChanged,
         currentThemeMode: widget.currentThemeMode,
+        currentLocale: widget.currentLocale,
+        onLocaleChanged: widget.onLocaleChanged,
       ),
     ];
 
@@ -65,26 +72,26 @@ class _MainScreenState extends State<MainScreen> {
             _currentIndex = index;
           });
         },
-        destinations: const [
+        destinations: [
           NavigationDestination(
-            icon: Icon(Icons.qr_code_scanner_rounded),
-            selectedIcon: Icon(Icons.qr_code_scanner_rounded),
-            label: 'Skaner',
+            icon: const Icon(Icons.qr_code_scanner_rounded),
+            selectedIcon: const Icon(Icons.qr_code_scanner_rounded),
+            label: context.tr('nav_scanner'),
           ),
           NavigationDestination(
-            icon: Icon(Icons.qr_code_2_rounded),
-            selectedIcon: Icon(Icons.qr_code_2_rounded),
-            label: 'Generator',
+            icon: const Icon(Icons.qr_code_2_rounded),
+            selectedIcon: const Icon(Icons.qr_code_2_rounded),
+            label: context.tr('nav_generator'),
           ),
           NavigationDestination(
-            icon: Icon(Icons.history_rounded),
-            selectedIcon: Icon(Icons.history_rounded),
-            label: 'Tarixçə',
+            icon: const Icon(Icons.history_rounded),
+            selectedIcon: const Icon(Icons.history_rounded),
+            label: context.tr('nav_history'),
           ),
           NavigationDestination(
-            icon: Icon(Icons.settings_outlined),
-            selectedIcon: Icon(Icons.settings_rounded),
-            label: 'Tənzimləmələr',
+            icon: const Icon(Icons.settings_outlined),
+            selectedIcon: const Icon(Icons.settings_rounded),
+            label: context.tr('nav_settings'),
           ),
         ],
       ),

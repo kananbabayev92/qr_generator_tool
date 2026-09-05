@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import '../../core/localization/app_strings.dart';
 import '../../models/qr_item.dart';
 import '../../services/action_helper.dart';
 import '../../services/security_service.dart';
@@ -107,8 +108,8 @@ class _ScannerScreenState extends State<ScannerScreen>
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Seçilmiş şəkildə heç bir QR kod tapılmadı'),
+          SnackBar(
+            content: Text(context.tr('scanner_no_qr_in_image')),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -116,7 +117,7 @@ class _ScannerScreenState extends State<ScannerScreen>
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Şəkil oxunarkən xəta: $e')),
+          SnackBar(content: Text('${context.tr('scanner_error_reading_image')}$e')),
         );
       }
     }
@@ -168,239 +169,239 @@ class _ScannerScreenState extends State<ScannerScreen>
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-              // Yuxarı tutacaq
-              Center(
-                child: Container(
-                  width: 44,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade400,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // Uğurlu skan ikonu və başlıq
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.green.withValues(alpha: 0.15),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(Icons.check_rounded,
-                        color: Colors.green, size: 28),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'QR Kod Oxundu!',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          _getTypeName(item.type),
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: theme.colorScheme.primary,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
+                  // Yuxarı tutacaq
+                  Center(
+                    child: Container(
+                      width: 44,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade400,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
                     ),
                   ),
-                ],
-              ),
-              const SizedBox(height: 18),
+                  const SizedBox(height: 20),
 
-              // Təhlükəsizlik Auditi Kartı
-              () {
-                final audit = SecurityService.analyze(item.data);
-                final Color cardColor;
-                final Color borderColor;
-                final Color textColor;
-                final IconData iconData;
-
-                if (audit.isBlocked) {
-                  cardColor = Colors.red.withValues(alpha: 0.1);
-                  borderColor = Colors.red;
-                  textColor = Colors.red.shade900;
-                  iconData = Icons.gpp_bad_rounded;
-                } else if (audit.isSuspicious) {
-                  cardColor = Colors.amber.withValues(alpha: 0.15);
-                  borderColor = Colors.amber.shade700;
-                  textColor = Colors.amber.shade900;
-                  iconData = Icons.warning_amber_rounded;
-                } else {
-                  cardColor = Colors.green.withValues(alpha: 0.1);
-                  borderColor = Colors.green;
-                  textColor = Colors.green.shade900;
-                  iconData = Icons.verified_user_rounded;
-                }
-
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 14),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: cardColor,
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: borderColor.withValues(alpha: 0.5)),
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  // Uğurlu skan ikonu və başlıq
+                  Row(
                     children: [
-                      Icon(iconData, color: borderColor, size: 24),
-                      const SizedBox(width: 10),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.green.withValues(alpha: 0.15),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.check_rounded,
+                            color: Colors.green, size: 28),
+                      ),
+                      const SizedBox(width: 14),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              audit.isBlocked
-                                  ? 'TƏHLÜKƏLİ: ${audit.title}'
-                                  : audit.isSuspicious
-                                      ? 'DİQQƏT: ${audit.title}'
-                                      : 'TƏHLÜKƏSİZLİK AUDİTİ: Təmiz',
+                              context.tr('scanner_result_title'),
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              _getTypeName(context, item.type),
                               style: TextStyle(
                                 fontSize: 13,
-                                fontWeight: FontWeight.bold,
-                                color: textColor,
+                                color: theme.colorScheme.primary,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
-                            const SizedBox(height: 2),
-                            Text(
-                              audit.description,
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: textColor.withValues(alpha: 0.9),
-                              ),
-                            ),
-                            if (audit.warnings.isNotEmpty) ...[
-                              const SizedBox(height: 4),
-                              ...audit.warnings.map(
-                                (w) => Text(
-                                  '• $w',
-                                  style: TextStyle(
-                                    fontSize: 10.5,
-                                    fontWeight: FontWeight.w600,
-                                    color: textColor,
-                                  ),
-                                ),
-                              ),
-                            ],
                           ],
                         ),
                       ),
                     ],
                   ),
-                );
-              }(),
+                  const SizedBox(height: 18),
 
-              // Oxunmuş məzmun qutusu
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: theme.cardTheme.color,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                      color: theme.dividerColor.withValues(alpha: 0.2)),
-                ),
-                child: SelectableText(
-                  item.data,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
+                  // Təhlükəsizlik Auditi Kartı
+                  () {
+                    final audit = SecurityService.analyze(item.data);
+                    final Color cardColor;
+                    final Color borderColor;
+                    final Color textColor;
+                    final IconData iconData;
 
-              // Əsas əməliyyat düyməsi (Aç, Zəng et və s.)
-              ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  backgroundColor: SecurityService.analyze(item.data).isBlocked
-                      ? Colors.red
-                      : null,
-                  foregroundColor: SecurityService.analyze(item.data).isBlocked
-                      ? Colors.white
-                      : null,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                ),
-                onPressed: () {
-                  Navigator.pop(context);
-                  ActionHelper.performPrimaryAction(context, item);
-                },
-                icon: Icon(
-                  SecurityService.analyze(item.data).isBlocked
-                      ? Icons.block_rounded
-                      : _getPrimaryIcon(item.type),
-                ),
-                label: Text(
-                  SecurityService.analyze(item.data).isBlocked
-                      ? 'Təhlükəli: İcra Bloklanıb'
-                      : _getPrimaryLabel(item.type),
-                ),
-              ),
-              const SizedBox(height: 10),
+                    if (audit.isBlocked) {
+                      cardColor = Colors.red.withValues(alpha: 0.1);
+                      borderColor = Colors.red;
+                      textColor = Colors.red.shade900;
+                      iconData = Icons.gpp_bad_rounded;
+                    } else if (audit.isSuspicious) {
+                      cardColor = Colors.amber.withValues(alpha: 0.15);
+                      borderColor = Colors.amber.shade700;
+                      textColor = Colors.amber.shade900;
+                      iconData = Icons.warning_amber_rounded;
+                    } else {
+                      cardColor = Colors.green.withValues(alpha: 0.1);
+                      borderColor = Colors.green;
+                      textColor = Colors.green.shade900;
+                      iconData = Icons.verified_user_rounded;
+                    }
 
-              // Köməkçi düymələr (Kopyala & Paylaş)
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 14),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: cardColor,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: borderColor.withValues(alpha: 0.5)),
                       ),
-                      onPressed: () {
-                        ActionHelper.copyToClipboard(context, item.data);
-                      },
-                      icon: const Icon(Icons.copy_rounded, size: 18),
-                      label: const Text('Kopyala'),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(iconData, color: borderColor, size: 24),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  audit.isBlocked
+                                      ? context.tr('scanner_security_blocked')
+                                      : audit.isSuspicious
+                                          ? context.tr('scanner_security_suspicious')
+                                          : context.tr('scanner_security_clean'),
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.bold,
+                                    color: textColor,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  audit.description,
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: textColor.withValues(alpha: 0.9),
+                                  ),
+                                ),
+                                if (audit.warnings.isNotEmpty) ...[
+                                  const SizedBox(height: 4),
+                                  ...audit.warnings.map(
+                                    (w) => Text(
+                                      '• $w',
+                                      style: TextStyle(
+                                        fontSize: 10.5,
+                                        fontWeight: FontWeight.w600,
+                                        color: textColor,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }(),
+
+                  // Oxunmuş məzmun qutusu
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: theme.cardTheme.color,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                          color: theme.dividerColor.withValues(alpha: 0.2)),
+                    ),
+                    child: SelectableText(
+                      item.data,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
+                  const SizedBox(height: 20),
+
+                  // Əsas əməliyyat düyməsi (Aç, Zəng et və s.)
+                  ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      backgroundColor: SecurityService.analyze(item.data).isBlocked
+                          ? Colors.red
+                          : null,
+                      foregroundColor: SecurityService.analyze(item.data).isBlocked
+                          ? Colors.white
+                          : null,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.pop(context);
+                      ActionHelper.performPrimaryAction(context, item);
+                    },
+                    icon: Icon(
+                      SecurityService.analyze(item.data).isBlocked
+                          ? Icons.block_rounded
+                          : _getPrimaryIcon(item.type),
+                    ),
+                    label: Text(
+                      SecurityService.analyze(item.data).isBlocked
+                          ? context.tr('action_blocked_btn')
+                          : _getPrimaryLabel(context, item.type),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+
+                  // Köməkçi düymələr (Kopyala & Paylaş)
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
+                          onPressed: () {
+                            ActionHelper.copyToClipboard(context, item.data);
+                          },
+                          icon: const Icon(Icons.copy_rounded, size: 18),
+                          label: Text(context.tr('scanner_copy')),
                         ),
                       ),
-                      onPressed: () {
-                        ActionHelper.shareText(item.data);
-                      },
-                      icon: const Icon(Icons.share_rounded, size: 18),
-                      label: const Text('Paylaş'),
-                    ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
+                          onPressed: () {
+                            ActionHelper.shareText(item.data);
+                          },
+                          icon: const Icon(Icons.share_rounded, size: 18),
+                          label: Text(context.tr('scanner_share')),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text(context.tr('scanner_rescan')),
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
-
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Yenidən Skan Et'),
-              ),
-            ],
+            ),
           ),
-        ),
-      ),
-    );
-  },
+        );
+      },
     ).then((_) {
       if (mounted) {
         setState(() {
@@ -410,22 +411,22 @@ class _ScannerScreenState extends State<ScannerScreen>
     });
   }
 
-  String _getTypeName(QrType type) {
+  String _getTypeName(BuildContext context, QrType type) {
     switch (type) {
       case QrType.url:
-        return 'Veb Sayt Linki';
+        return context.tr('type_url');
       case QrType.whatsapp:
-        return 'WhatsApp Çatı';
+        return context.tr('type_whatsapp');
       case QrType.wifi:
-        return 'Wi-Fi Şəbəkəsi';
+        return context.tr('type_wifi');
       case QrType.phone:
-        return 'Telefon Nömrəsi';
+        return context.tr('type_phone');
       case QrType.email:
-        return 'Email Ünvanı';
+        return context.tr('type_email');
       case QrType.sms:
-        return 'SMS Mesajı';
+        return context.tr('type_sms');
       case QrType.text:
-        return 'Düz Mətn';
+        return context.tr('type_text');
     }
   }
 
@@ -447,22 +448,22 @@ class _ScannerScreenState extends State<ScannerScreen>
     }
   }
 
-  String _getPrimaryLabel(QrType type) {
+  String _getPrimaryLabel(BuildContext context, QrType type) {
     switch (type) {
       case QrType.url:
-        return 'Brauzerdə Aç';
+        return context.tr('action_open_browser');
       case QrType.whatsapp:
-        return 'WhatsApp-da Yaz';
+        return context.tr('action_open_whatsapp');
       case QrType.phone:
-        return 'Zəng Et';
+        return context.tr('action_call');
       case QrType.email:
-        return 'Email Göndər';
+        return context.tr('action_send_email');
       case QrType.sms:
-        return 'SMS Göndər';
+        return context.tr('action_send_sms');
       case QrType.wifi:
-        return 'Wi-Fi Şifrəsini Kopyala';
+        return context.tr('action_copy_wifi');
       case QrType.text:
-        return 'Mətni Kopyala';
+        return context.tr('action_copy_text');
     }
   }
 
@@ -492,11 +493,11 @@ class _ScannerScreenState extends State<ScannerScreen>
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Flexible(
+                  Flexible(
                     child: Text(
-                      'QR Skaner',
+                      context.tr('scanner_title'),
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -516,7 +517,7 @@ class _ScannerScreenState extends State<ScannerScreen>
                           Icons.photo_library_rounded,
                           color: Colors.white,
                         ),
-                        tooltip: 'Qalereyadan seç',
+                        tooltip: context.tr('scanner_pick_gallery'),
                         onPressed: _pickImageFromGallery,
                       ),
                       const SizedBox(width: 6),
@@ -539,6 +540,7 @@ class _ScannerScreenState extends State<ScannerScreen>
                             );
                           },
                         ),
+                        tooltip: context.tr('scanner_flash'),
                         onPressed: () => _controller.toggleTorch(),
                       ),
                       const SizedBox(width: 6),
@@ -552,6 +554,7 @@ class _ScannerScreenState extends State<ScannerScreen>
                           Icons.flip_camera_ios_rounded,
                           color: Colors.white,
                         ),
+                        tooltip: context.tr('scanner_switch_camera'),
                         onPressed: () => _controller.switchCamera(),
                       ),
                     ],
@@ -567,20 +570,20 @@ class _ScannerScreenState extends State<ScannerScreen>
 
   // Kamera açılmadıqda və ya xəta olduqda göstərilən xəbərdarlıq vidceti
   Widget _buildCameraErrorWidget(BuildContext context, MobileScannerException error) {
-    String message = 'Kamera başladılarkən xəta baş verdi.';
+    String message = context.tr('scanner_cam_error');
     IconData icon = Icons.videocam_off_rounded;
 
     switch (error.errorCode) {
       case MobileScannerErrorCode.permissionDenied:
-        message = 'Kamera icazəsi verilməyib.\nZəhmət olmasa tətbiq tənzimləmələrindən kamera icazəsini aktivləşdirin.';
+        message = context.tr('scanner_perm_denied');
         icon = Icons.no_photography_rounded;
         break;
       case MobileScannerErrorCode.unsupported:
-        message = 'Bu cihazda kamera dəstəklənmir və ya mövcud deyil.';
+        message = context.tr('scanner_cam_unsupported');
         icon = Icons.camera_alt_outlined;
         break;
       default:
-        message = 'Kamera hazır deyil və ya başqa tətbiq tərəfindən istifadə olunur.';
+        message = context.tr('scanner_cam_error');
         icon = Icons.warning_amber_rounded;
         break;
     }
@@ -621,7 +624,7 @@ class _ScannerScreenState extends State<ScannerScreen>
               ),
               onPressed: () => _controller.start(),
               icon: const Icon(Icons.refresh_rounded),
-              label: const Text('Yenidən yoxla'),
+              label: Text(context.tr('scanner_retry')),
             ),
           ],
         ),

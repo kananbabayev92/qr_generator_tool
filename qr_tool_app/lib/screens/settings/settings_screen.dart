@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/localization/app_strings.dart';
 import '../../services/storage_service.dart';
 import '../../widgets/ontero_logo.dart';
 
@@ -7,52 +8,68 @@ class SettingsScreen extends StatelessWidget {
   final StorageService storageService;
   final ValueChanged<ThemeMode>? onThemeModeChanged;
   final ThemeMode currentThemeMode;
+  final String currentLocale;
+  final ValueChanged<String>? onLocaleChanged;
 
   const SettingsScreen({
     super.key,
     required this.storageService,
     this.onThemeModeChanged,
     this.currentThemeMode = ThemeMode.system,
+    this.currentLocale = 'en',
+    this.onLocaleChanged,
   });
 
   @override
   Widget build(BuildContext context) {
+    final activeLanguage = AppStrings.supportedLanguages.firstWhere(
+      (lang) => lang.code == currentLocale,
+      orElse: () => AppStrings.supportedLanguages.first,
+    );
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tənzimləmələr'),
+        title: Text(context.tr('settings_title')),
       ),
       body: ListView(
         padding: const EdgeInsets.symmetric(vertical: 12),
         children: [
-          // Görünüş bölməsi
-          _buildSectionHeader('GÖRÜNÜŞ & TEMA'),
+          // Görünüş & Dil bölməsi
+          _buildSectionHeader(context.tr('settings_section_appearance')),
           ListTile(
             leading: const Icon(Icons.palette_outlined),
-            title: const Text('Görünüş rejimi'),
-            subtitle: Text(_getThemeModeName(currentThemeMode)),
+            title: Text(context.tr('settings_theme_mode')),
+            subtitle: Text(_getThemeModeName(context, currentThemeMode)),
             trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
             onTap: () => _showThemeDialog(context),
+          ),
+          ListTile(
+            leading: const Icon(Icons.translate_rounded),
+            title: Text(context.tr('settings_language')),
+            subtitle: Text('${activeLanguage.flag}  ${activeLanguage.nativeName} (${activeLanguage.name})'),
+            trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
+            onTap: () => _showLanguageDialog(context),
           ),
 
           const Divider(indent: 16, endIndent: 16),
 
           // Məlumat & Yaddaş bölməsi
-          _buildSectionHeader('YADDAŞ & TARİXÇƏ'),
+          _buildSectionHeader(context.tr('settings_section_storage')),
           ListenableBuilder(
             listenable: storageService,
             builder: (context, child) {
               return ListTile(
                 leading: const Icon(Icons.storage_rounded),
-                title: const Text('Saxlanılmış QR kodlar'),
-                subtitle: Text('${storageService.items.length} element saxlanılıb'),
+                title: Text(context.tr('settings_saved_items')),
+                subtitle: Text('${storageService.items.length} ${context.tr('settings_items_count')}'),
                 trailing: TextButton(
                   onPressed: () {
                     storageService.clearAll();
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Tarixçə təmizləndi')),
+                      SnackBar(content: Text(context.tr('settings_cleared_msg'))),
                     );
                   },
-                  child: const Text('Təmizlə', style: TextStyle(color: Colors.red)),
+                  child: Text(context.tr('settings_clear_btn'), style: const TextStyle(color: Colors.red)),
                 ),
               );
             },
@@ -61,18 +78,18 @@ class SettingsScreen extends StatelessWidget {
           const Divider(indent: 16, endIndent: 16),
 
           // Təhlükəsizlik & Mühafizə bölməsi
-          _buildSectionHeader('TƏHLÜKƏSİZLİK VƏ AUDİT'),
+          _buildSectionHeader(context.tr('settings_section_security')),
           ListTile(
             leading: const Icon(Icons.security_rounded, color: Colors.green),
-            title: const Text('Zərərli Proqram Mühafizəsi'),
-            subtitle: const Text('Aktiv (Zərərli fayllar və skriptlər bloklanır)'),
+            title: Text(context.tr('settings_malware_protection')),
+            subtitle: Text(context.tr('settings_malware_active')),
             trailing: const Icon(Icons.check_circle_rounded, color: Colors.green),
             onTap: () => _showSecurityReportDialog(context),
           ),
           ListTile(
             leading: const Icon(Icons.verified_user_outlined),
-            title: const Text('Təhlükəsizlik Auditi Hesabatı'),
-            subtitle: const Text('Parametrlər və audit nəticələrinə bax'),
+            title: Text(context.tr('settings_audit_report')),
+            subtitle: Text(context.tr('settings_audit_report_sub')),
             trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
             onTap: () => _showSecurityReportDialog(context),
           ),
@@ -80,7 +97,7 @@ class SettingsScreen extends StatelessWidget {
           const Divider(indent: 16, endIndent: 16),
 
           // Haqqında bölməsi
-          _buildSectionHeader('HAQQINDA'),
+          _buildSectionHeader(context.tr('settings_section_about')),
           Container(
             margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             padding: const EdgeInsets.all(16),
@@ -123,7 +140,7 @@ class SettingsScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Sürətli, təhlükəsiz və çoxfunksiyalı QR & Barkod aləti',
+                        'Fast, secure and versatile QR & Barcode suite',
                         style: TextStyle(
                           fontSize: 11,
                           color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.8),
@@ -135,15 +152,15 @@ class SettingsScreen extends StatelessWidget {
               ],
             ),
           ),
-          const ListTile(
-            leading: Icon(Icons.info_outline_rounded),
-            title: Text('Versiya'),
-            subtitle: Text('1.0.0 (Ontero Suite)'),
+          ListTile(
+            leading: const Icon(Icons.info_outline_rounded),
+            title: Text(context.tr('settings_version')),
+            subtitle: const Text('1.0.0 (Ontero Suite)'),
           ),
           ListTile(
             leading: const Icon(Icons.privacy_tip_outlined),
-            title: const Text('Məxfilik Siyasəti (Privacy Policy)'),
-            subtitle: const Text('Məlumatlarınızın təhlükəsizliyi və icazələr haqqında'),
+            title: Text(context.tr('settings_privacy_policy')),
+            subtitle: Text(context.tr('settings_privacy_policy_sub')),
             trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
             onTap: () => _showPrivacyPolicyDialog(context),
           ),
@@ -167,14 +184,14 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  String _getThemeModeName(ThemeMode mode) {
+  String _getThemeModeName(BuildContext context, ThemeMode mode) {
     switch (mode) {
       case ThemeMode.system:
-        return 'Sistem rejimi (Avtomatik)';
+        return context.tr('settings_theme_system');
       case ThemeMode.light:
-        return 'Açıq rejim';
+        return context.tr('settings_theme_light');
       case ThemeMode.dark:
-        return 'Qaranlıq rejim';
+        return context.tr('settings_theme_dark');
     }
   }
 
@@ -182,26 +199,26 @@ class SettingsScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Görünüş rejimini seçin'),
+        title: Text(context.tr('settings_theme_dialog_title')),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             _buildThemeTile(
               context: context,
-              title: 'Sistem rejimi',
+              title: context.tr('settings_theme_system'),
               icon: Icons.brightness_auto_rounded,
               mode: ThemeMode.system,
             ),
             _buildThemeTile(
               context: context,
-              title: 'Açıq rejim',
+              title: context.tr('settings_theme_light'),
               icon: Icons.light_mode_rounded,
               mode: ThemeMode.light,
             ),
             _buildThemeTile(
               context: context,
-              title: 'Qaranlıq rejim',
+              title: context.tr('settings_theme_dark'),
               icon: Icons.dark_mode_rounded,
               mode: ThemeMode.dark,
             ),
@@ -240,51 +257,108 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
+  void _showLanguageDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            const Icon(Icons.language_rounded),
+            const SizedBox(width: 8),
+            Text(context.tr('settings_lang_dialog_title')),
+          ],
+        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: AppStrings.supportedLanguages.length,
+            itemBuilder: (context, index) {
+              final lang = AppStrings.supportedLanguages[index];
+              final isSelected = currentLocale == lang.code;
+              final primaryColor = Theme.of(context).colorScheme.primary;
+
+              return ListTile(
+                leading: Text(
+                  lang.flag,
+                  style: const TextStyle(fontSize: 24),
+                ),
+                title: Text(
+                  lang.nativeName,
+                  style: TextStyle(
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    color: isSelected ? primaryColor : null,
+                  ),
+                ),
+                subtitle: Text(
+                  lang.name,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: isSelected ? primaryColor.withValues(alpha: 0.8) : Colors.grey,
+                  ),
+                ),
+                trailing: isSelected
+                    ? Icon(Icons.check_circle_rounded, color: primaryColor)
+                    : null,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                onTap: () {
+                  onLocaleChanged?.call(lang.code);
+                  Navigator.pop(context);
+                },
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
   void _showSecurityReportDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.security_rounded, color: Colors.green),
-            SizedBox(width: 8),
-            Text('Təhlükəsizlik Auditi', style: TextStyle(fontSize: 18)),
+            const Icon(Icons.security_rounded, color: Colors.green),
+            const SizedBox(width: 8),
+            Text(context.tr('sec_dialog_title'), style: const TextStyle(fontSize: 18)),
           ],
         ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        content: const SingleChildScrollView(
+        content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Tətbiq üzrə aparılmış təhlükəsizlik auditi və aktiv mühafizə parametrləri:',
-                style: TextStyle(fontSize: 13),
+                context.tr('sec_dialog_intro'),
+                style: const TextStyle(fontSize: 13),
               ),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
               _AuditItem(
-                title: 'Zərərli Proqram Filtrləməsi',
-                description: '.apk, .exe, .bat, .vbs, .sh və digər 25+ icra olunan zərərli proqram fayllarının QR koda çevrilməsi və açılması tam bloklanıb.',
+                title: context.tr('sec_item_malware_title'),
+                description: context.tr('sec_item_malware_desc'),
                 isSuccess: true,
               ),
               _AuditItem(
-                title: 'Skript & XSS Mühafizəsi',
-                description: 'javascript:, data:, file: kimi təhlükəli sistem protokolları və skript inyeksiyaları qadağan edilib.',
+                title: context.tr('sec_item_script_title'),
+                description: context.tr('sec_item_script_desc'),
                 isSuccess: true,
               ),
               _AuditItem(
-                title: 'Skaner Risk Təhlili',
-                description: 'Skan edilən hər bir kod real-vaxt rejimində təhlil edilir və şübhəli/təhlükəli linklər barədə xəbərdarlıq verilir.',
+                title: context.tr('sec_item_scanner_title'),
+                description: context.tr('sec_item_scanner_desc'),
                 isSuccess: true,
               ),
               _AuditItem(
-                title: 'Yaddaş və DoS Qorunması',
-                description: 'QR kod generatorunda daşma və dondurma hücumlarının qarşısını almaq üçün 2953 simvol həddi tətbiq edilir.',
+                title: context.tr('sec_item_dos_title'),
+                description: context.tr('sec_item_dos_desc'),
                 isSuccess: true,
               ),
               _AuditItem(
-                title: 'Lokal Məxfilik (Zero-Knowledge)',
-                description: 'Bütün QR məlumatları yalnız lokal cihazda (SharedPreferences) saxlanılır, heç bir xarici serverə göndərilmir.',
+                title: context.tr('sec_item_privacy_title'),
+                description: context.tr('sec_item_privacy_desc'),
                 isSuccess: true,
               ),
             ],
@@ -293,7 +367,7 @@ class SettingsScreen extends StatelessWidget {
         actions: [
           FilledButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Bağla'),
+            child: Text(context.tr('settings_close')),
           ),
         ],
       ),
@@ -304,42 +378,42 @@ class SettingsScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.privacy_tip_rounded, color: Colors.blue),
-            SizedBox(width: 8),
-            Text('Məxfilik Siyasəti', style: TextStyle(fontSize: 18)),
+            const Icon(Icons.privacy_tip_rounded, color: Colors.blue),
+            const SizedBox(width: 8),
+            Text(context.tr('settings_privacy_policy'), style: const TextStyle(fontSize: 18)),
           ],
         ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        content: const SingleChildScrollView(
+        content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Məlumatlarınızın qorunması bizim üçün prioritetdir:',
+              const Text(
+                'Data protection and privacy are our top priorities:',
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
               ),
-              SizedBox(height: 12),
-              _AuditItem(
-                title: 'Kamera və Media İcazəsi',
-                description: 'Kameranız yalnız real vaxtda QR kodları oxumaq üçün istifadə olunur. Heç bir görüntü və ya video yaddaşa yazılmır və ya ötürülmür.',
+              const SizedBox(height: 12),
+              const _AuditItem(
+                title: 'Camera Access',
+                description: 'Used strictly in memory for scanning QR codes in real-time. No photos or videos are ever uploaded or saved.',
                 isSuccess: true,
               ),
-              _AuditItem(
-                title: 'Lokal Emal və Yaddaş',
-                description: 'Skan olunmuş və yaradılmış bütün kodlar yalnız telefonunuzun daxili yaddaşında saxlanılır. İstənilən vaxt təmizləyə bilərsiniz.',
+              const _AuditItem(
+                title: 'Zero-Knowledge Storage',
+                description: 'All your history and generated codes stay strictly on your local device. You can clear it anytime.',
                 isSuccess: true,
               ),
-              _AuditItem(
-                title: 'Şəxsi Məlumatların Toplanmaması',
-                description: 'Tətbiq ad, soyad, e-poçt və ya əlaqə nömrələri kimi şəxsi məlumatları toplamır və heç bir kənar serverə ötürmür.',
+              const _AuditItem(
+                title: 'No Personal Data Collection',
+                description: 'We do not collect your name, email, phone number, contacts or files.',
                 isSuccess: true,
               ),
-              _AuditItem(
-                title: 'Reklam Tərəfdaşları',
-                description: 'Tətbiqdaxili reklamların təqdim edilməsi üçün anonim cihaz identifikatorundan (Google Advertising ID) istifadə oluna bilər.',
+              const _AuditItem(
+                title: 'Advertising Identifiers',
+                description: 'Anonymous advertising IDs may be used strictly for measurement according to standard Google Play guidelines.',
                 isSuccess: true,
               ),
             ],
@@ -348,7 +422,7 @@ class SettingsScreen extends StatelessWidget {
         actions: [
           FilledButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Bağla'),
+            child: Text(context.tr('settings_close')),
           ),
         ],
       ),

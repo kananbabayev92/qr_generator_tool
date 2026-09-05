@@ -11,12 +11,16 @@ class SplashScreen extends StatefulWidget {
   final StorageService storageService;
   final ThemeMode currentThemeMode;
   final ValueChanged<ThemeMode>? onThemeModeChanged;
+  final String currentLocale;
+  final ValueChanged<String>? onLocaleChanged;
 
   const SplashScreen({
     super.key,
     required this.storageService,
     required this.currentThemeMode,
     this.onThemeModeChanged,
+    this.currentLocale = 'en',
+    this.onLocaleChanged,
   });
 
   @override
@@ -90,6 +94,8 @@ class _SplashScreenState extends State<SplashScreen>
           storageService: widget.storageService,
           currentThemeMode: widget.currentThemeMode,
           onThemeModeChanged: widget.onThemeModeChanged,
+          currentLocale: widget.currentLocale,
+          onLocaleChanged: widget.onLocaleChanged,
         ),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           return FadeTransition(
@@ -214,7 +220,7 @@ class _SplashScreenState extends State<SplashScreen>
 
                       const SizedBox(height: 16),
                       Text(
-                        'Sürətli • Təhlükəsiz • Peşəkar',
+                        'Fast • Secure • Professional',
                         style: TextStyle(
                           fontSize: 13,
                           color: Colors.white.withValues(alpha: 0.65),
