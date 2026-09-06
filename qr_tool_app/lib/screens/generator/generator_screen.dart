@@ -419,33 +419,19 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
                               ),
                             ],
                           ),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              QrImageView(
-                                data: _generatedData,
-                                version: QrVersions.auto,
-                                size: 210.0,
-                                eyeStyle: QrEyeStyle(
-                                  eyeShape: QrEyeShape.square,
-                                  color: _qrForegroundColor,
-                                ),
-                                dataModuleStyle: QrDataModuleStyle(
-                                  dataModuleShape: QrDataModuleShape.square,
-                                  color: _qrForegroundColor,
-                                ),
-                                backgroundColor: Colors.transparent,
-                              ),
-                              const SizedBox(height: 10),
-                              Text(
-                                _getFriendlyTitle(),
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: _qrForegroundColor.withValues(alpha: 0.8),
-                                ),
-                              ),
-                            ],
+                          child: QrImageView(
+                            data: _generatedData,
+                            version: QrVersions.auto,
+                            size: 210.0,
+                            eyeStyle: QrEyeStyle(
+                              eyeShape: QrEyeShape.square,
+                              color: _qrForegroundColor,
+                            ),
+                            dataModuleStyle: QrDataModuleStyle(
+                              dataModuleShape: QrDataModuleShape.square,
+                              color: _qrForegroundColor,
+                            ),
+                            backgroundColor: Colors.transparent,
                           ),
                         ),
                       ),
