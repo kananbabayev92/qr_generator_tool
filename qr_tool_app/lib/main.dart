@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'core/localization/app_strings.dart';
 import 'core/theme/app_theme.dart';
-import 'screens/splash/splash_screen.dart';
+import 'screens/main_screen.dart';
 import 'services/storage_service.dart';
 
 void main() async {
@@ -84,7 +84,7 @@ class _QrToolAppState extends State<QrToolApp> {
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: _themeMode,
-      home: SplashScreen(
+      home: MainScreen(
         storageService: widget.storageService,
         currentThemeMode: _themeMode,
         onThemeModeChanged: _changeThemeMode,

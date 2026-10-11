@@ -60,6 +60,23 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
     const Color(0xFF7C3AED), // Tünd bənövşəyi
   ];
 
+  // Mərkəzi Loqo / İkon seçimləri
+  IconData? _selectedCenterIcon;
+  final List<IconData?> _presetCenterIcons = [
+    null, // Təmiz QR (İkonsuz)
+    Icons.qr_code_2_rounded,
+    Icons.wifi_rounded,
+    Icons.link_rounded,
+    Icons.call_rounded,
+    Icons.mail_rounded,
+    Icons.chat_bubble_rounded,
+    Icons.star_rounded,
+    Icons.favorite_rounded,
+    Icons.shopping_bag_rounded,
+    Icons.security_rounded,
+    Icons.location_on_rounded,
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -419,19 +436,54 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
                               ),
                             ],
                           ),
-                          child: QrImageView(
-                            data: _generatedData,
-                            version: QrVersions.auto,
-                            size: 210.0,
-                            eyeStyle: QrEyeStyle(
-                              eyeShape: QrEyeShape.square,
-                              color: _qrForegroundColor,
-                            ),
-                            dataModuleStyle: QrDataModuleStyle(
-                              dataModuleShape: QrDataModuleShape.square,
-                              color: _qrForegroundColor,
-                            ),
-                            backgroundColor: Colors.transparent,
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              QrImageView(
+                                data: _generatedData,
+                                version: QrVersions.auto,
+                                errorCorrectionLevel: _selectedCenterIcon != null
+                                    ? QrErrorCorrectLevel.H
+                                    : QrErrorCorrectLevel.M,
+                                size: 210.0,
+                                eyeStyle: QrEyeStyle(
+                                  eyeShape: QrEyeShape.square,
+                                  color: _qrForegroundColor,
+                                ),
+                                dataModuleStyle: QrDataModuleStyle(
+                                  dataModuleShape: QrDataModuleShape.square,
+                                  color: _qrForegroundColor,
+                                ),
+                                backgroundColor: Colors.transparent,
+                              ),
+                              if (_selectedCenterIcon != null)
+                                Container(
+                                  width: 44,
+                                  height: 44,
+                                  decoration: BoxDecoration(
+                                    color: _qrBackgroundColor,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: _qrForegroundColor.withValues(alpha: 0.18),
+                                      width: 2,
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withValues(alpha: 0.12),
+                                        blurRadius: 6,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Center(
+                                    child: Icon(
+                                      _selectedCenterIcon,
+                                      size: 24,
+                                      color: _qrForegroundColor,
+                                    ),
+                                  ),
+                                ),
+                            ],
                           ),
                         ),
                       ),
@@ -440,6 +492,10 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
 
                     // Rəng seçici palitrası
                     _buildColorPicker(),
+                    const SizedBox(height: 16),
+
+                    // Mərkəzi Loqo / İkon seçici
+                    _buildCenterIconPicker(),
                     const SizedBox(height: 20),
 
                     // Əməliyyat düymələri (Yadda saxla, Şəkil kimi paylaş, Mətni kopyala)
@@ -554,6 +610,76 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
               ),
             );
           }).toList(),
+        ),
+      ],
+    );
+  }
+
+  // Mərkəzi Loqo / İkon seçici komponenti
+  Widget _buildCenterIconPicker() {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          context.tr('gen_icon_picker'),
+          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 8),
+        SizedBox(
+          height: 44,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: _presetCenterIcons.length,
+            separatorBuilder: (context, index) => const SizedBox(width: 8),
+            itemBuilder: (context, index) {
+              final icon = _presetCenterIcons[index];
+              final isSelected = _selectedCenterIcon == icon;
+
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _selectedCenterIcon = icon;
+                  });
+                },
+                child: Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? theme.colorScheme.primary.withValues(alpha: 0.15)
+                        : (isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9)),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: isSelected
+                          ? theme.colorScheme.primary
+                          : Colors.transparent,
+                      width: 2,
+                    ),
+                  ),
+                  child: Center(
+                    child: icon == null
+                        ? Icon(
+                            Icons.block_rounded,
+                            size: 18,
+                            color: isSelected
+                                ? theme.colorScheme.primary
+                                : Colors.grey,
+                          )
+                        : Icon(
+                            icon,
+                            size: 20,
+                            color: isSelected
+                                ? theme.colorScheme.primary
+                                : (isDark ? Colors.white70 : Colors.black87),
+                          ),
+                  ),
+                ),
+              );
+            },
+          ),
         ),
       ],
     );
