@@ -417,6 +417,12 @@ class _ScannerScreenState extends State<ScannerScreen>
         return context.tr('type_url');
       case QrType.whatsapp:
         return context.tr('type_whatsapp');
+      case QrType.instagram:
+        return context.tr('type_instagram');
+      case QrType.telegram:
+        return context.tr('type_telegram');
+      case QrType.youtube:
+        return context.tr('type_youtube');
       case QrType.wifi:
         return context.tr('type_wifi');
       case QrType.phone:
@@ -436,6 +442,12 @@ class _ScannerScreenState extends State<ScannerScreen>
         return Icons.open_in_browser_rounded;
       case QrType.whatsapp:
         return Icons.chat_rounded;
+      case QrType.instagram:
+        return Icons.camera_alt_rounded;
+      case QrType.telegram:
+        return Icons.send_rounded;
+      case QrType.youtube:
+        return Icons.play_circle_fill_rounded;
       case QrType.phone:
         return Icons.call_rounded;
       case QrType.email:
@@ -454,6 +466,12 @@ class _ScannerScreenState extends State<ScannerScreen>
         return context.tr('action_open_browser');
       case QrType.whatsapp:
         return context.tr('action_open_whatsapp');
+      case QrType.instagram:
+        return context.tr('action_open_instagram');
+      case QrType.telegram:
+        return context.tr('action_open_telegram');
+      case QrType.youtube:
+        return context.tr('action_open_youtube');
       case QrType.phone:
         return context.tr('action_call');
       case QrType.email:

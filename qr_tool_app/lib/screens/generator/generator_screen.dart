@@ -46,6 +46,9 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
   final TextEditingController _smsController = TextEditingController();
   final TextEditingController _waPhoneController = TextEditingController();
   final TextEditingController _waMessageController = TextEditingController();
+  final TextEditingController _igUsernameController = TextEditingController();
+  final TextEditingController _tgUsernameController = TextEditingController();
+  final TextEditingController _ytChannelController = TextEditingController();
 
   String _wifiSecurity = 'WPA';
   String _generatedData = '';
@@ -54,8 +57,10 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
     const Color(0xFF0F172A), // Klassik qara/tünd
     const Color(0xFF6366F1), // İndigo bənövşəyi
     const Color(0xFF25D366), // WhatsApp yaşılı
+    const Color(0xFFE1306C), // Instagram çəhrayı/qırmızı
+    const Color(0xFF0088CC), // Telegram mavisi
+    const Color(0xFFFF0000), // YouTube qırmızı
     const Color(0xFF0284C7), // Okean mavisi
-    const Color(0xFFE11D48), // Qırmızı
     const Color(0xFFD97706), // Kəhrəba / Narıncı
     const Color(0xFF7C3AED), // Tünd bənövşəyi
   ];
@@ -67,9 +72,12 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
     Icons.qr_code_2_rounded,
     Icons.wifi_rounded,
     Icons.link_rounded,
+    Icons.chat_bubble_rounded,
+    Icons.camera_alt_rounded,
+    Icons.send_rounded,
+    Icons.play_circle_fill_rounded,
     Icons.call_rounded,
     Icons.mail_rounded,
-    Icons.chat_bubble_rounded,
     Icons.star_rounded,
     Icons.favorite_rounded,
     Icons.shopping_bag_rounded,
@@ -89,6 +97,9 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
     _smsController.addListener(_updateGeneratedData);
     _waPhoneController.addListener(_updateGeneratedData);
     _waMessageController.addListener(_updateGeneratedData);
+    _igUsernameController.addListener(_updateGeneratedData);
+    _tgUsernameController.addListener(_updateGeneratedData);
+    _ytChannelController.addListener(_updateGeneratedData);
   }
 
   @override
@@ -102,6 +113,9 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
     _smsController.dispose();
     _waPhoneController.dispose();
     _waMessageController.dispose();
+    _igUsernameController.dispose();
+    _tgUsernameController.dispose();
+    _ytChannelController.dispose();
     super.dispose();
   }
 
@@ -124,6 +138,36 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
             } else {
               _generatedData = 'https://wa.me/$phone';
             }
+          } else {
+            _generatedData = '';
+          }
+          break;
+
+        case QrType.instagram:
+          var user = _igUsernameController.text.trim();
+          if (user.startsWith('@')) user = user.substring(1);
+          if (user.isNotEmpty) {
+            _generatedData = 'https://instagram.com/$user';
+          } else {
+            _generatedData = '';
+          }
+          break;
+
+        case QrType.telegram:
+          var tg = _tgUsernameController.text.trim();
+          if (tg.startsWith('@')) tg = tg.substring(1);
+          if (tg.startsWith('t.me/')) tg = 'https://$tg';
+          if (tg.isNotEmpty) {
+            _generatedData = tg.startsWith('http') ? tg : 'https://t.me/$tg';
+          } else {
+            _generatedData = '';
+          }
+          break;
+
+        case QrType.youtube:
+          final yt = _ytChannelController.text.trim();
+          if (yt.isNotEmpty) {
+            _generatedData = yt.startsWith('http') ? yt : 'https://youtube.com/$yt';
           } else {
             _generatedData = '';
           }
@@ -274,6 +318,12 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
     switch (_selectedType) {
       case QrType.whatsapp:
         return 'WhatsApp: ${_waPhoneController.text}';
+      case QrType.instagram:
+        return 'Instagram: @${_igUsernameController.text.trim().replaceAll('@', '')}';
+      case QrType.telegram:
+        return 'Telegram: @${_tgUsernameController.text.trim().replaceAll('@', '')}';
+      case QrType.youtube:
+        return 'YouTube: ${_ytChannelController.text.trim()}';
       case QrType.wifi:
         return 'Wi-Fi: ${_ssidController.text}';
       case QrType.email:
@@ -691,6 +741,9 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
       {'type': QrType.text, 'label': context.tr('type_text'), 'icon': Icons.text_fields_rounded},
       {'type': QrType.url, 'label': context.tr('type_url'), 'icon': Icons.link_rounded},
       {'type': QrType.whatsapp, 'label': context.tr('type_whatsapp'), 'icon': Icons.chat_rounded},
+      {'type': QrType.instagram, 'label': context.tr('type_instagram'), 'icon': Icons.camera_alt_rounded},
+      {'type': QrType.telegram, 'label': context.tr('type_telegram'), 'icon': Icons.send_rounded},
+      {'type': QrType.youtube, 'label': context.tr('type_youtube'), 'icon': Icons.play_circle_fill_rounded},
       {'type': QrType.wifi, 'label': context.tr('type_wifi'), 'icon': Icons.wifi_rounded},
       {'type': QrType.phone, 'label': context.tr('type_phone'), 'icon': Icons.phone_rounded},
       {'type': QrType.email, 'label': context.tr('type_email'), 'icon': Icons.email_rounded},
@@ -724,6 +777,19 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
                 if (selected) {
                   setState(() {
                     _selectedType = type;
+                    if (type == QrType.instagram) {
+                      _selectedCenterIcon = Icons.camera_alt_rounded;
+                      _qrForegroundColor = const Color(0xFFE1306C);
+                    } else if (type == QrType.telegram) {
+                      _selectedCenterIcon = Icons.send_rounded;
+                      _qrForegroundColor = const Color(0xFF0088CC);
+                    } else if (type == QrType.youtube) {
+                      _selectedCenterIcon = Icons.play_circle_fill_rounded;
+                      _qrForegroundColor = const Color(0xFFFF0000);
+                    } else if (type == QrType.whatsapp) {
+                      _selectedCenterIcon = Icons.chat_bubble_rounded;
+                      _qrForegroundColor = const Color(0xFF25D366);
+                    }
                     _updateGeneratedData();
                   });
                 }
@@ -785,6 +851,37 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
               ),
             ),
           ],
+        );
+
+      case QrType.instagram:
+        return TextField(
+          controller: _igUsernameController,
+          decoration: InputDecoration(
+            labelText: context.tr('gen_input_ig_user'),
+            hintText: context.tr('gen_input_ig_hint'),
+            prefixIcon: const Icon(Icons.camera_alt_rounded, color: Color(0xFFE1306C)),
+          ),
+        );
+
+      case QrType.telegram:
+        return TextField(
+          controller: _tgUsernameController,
+          decoration: InputDecoration(
+            labelText: context.tr('gen_input_tg_user'),
+            hintText: context.tr('gen_input_tg_hint'),
+            prefixIcon: const Icon(Icons.send_rounded, color: Color(0xFF0088CC)),
+          ),
+        );
+
+      case QrType.youtube:
+        return TextField(
+          controller: _ytChannelController,
+          keyboardType: TextInputType.url,
+          decoration: InputDecoration(
+            labelText: context.tr('gen_input_yt_channel'),
+            hintText: context.tr('gen_input_yt_hint'),
+            prefixIcon: const Icon(Icons.play_circle_fill_rounded, color: Color(0xFFFF0000)),
+          ),
         );
 
       case QrType.wifi:

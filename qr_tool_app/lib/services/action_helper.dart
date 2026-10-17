@@ -31,60 +31,28 @@ class ActionHelper {
       if (shouldProceed != true) return;
     }
 
+    if (!context.mounted) return;
+
     try {
       switch (item.type) {
         case QrType.url:
         case QrType.whatsapp:
-          final uri = Uri.tryParse(data);
-          if (uri == null || (!uri.isScheme('http') && !uri.isScheme('https'))) {
-            if (context.mounted) {
-              _showSnackBar(context, context.tr('action_only_https'));
-            }
-            return;
-          }
-          if (await canLaunchUrl(uri)) {
-            await launchUrl(uri, mode: LaunchMode.externalApplication);
-          } else {
-            if (context.mounted) {
-              _showSnackBar(context, context.tr('action_link_error'));
-            }
-          }
+        case QrType.instagram:
+        case QrType.telegram:
+        case QrType.youtube:
+          await _launchWebOrAppUrl(context, data);
           break;
 
         case QrType.phone:
-          final uri = Uri.parse(data.startsWith('tel:') ? data : 'tel:$data');
-          if (await canLaunchUrl(uri)) {
-            await launchUrl(uri);
-          } else {
-            if (context.mounted) {
-              _showSnackBar(context, context.tr('action_call_error'));
-            }
-          }
+          await _launchPhone(context, data);
           break;
 
         case QrType.email:
-          final uri =
-              Uri.parse(data.startsWith('mailto:') ? data : 'mailto:$data');
-          if (await canLaunchUrl(uri)) {
-            await launchUrl(uri);
-          } else {
-            if (context.mounted) {
-              _showSnackBar(context, context.tr('action_email_error'));
-            }
-          }
+          await _launchEmail(context, data);
           break;
 
         case QrType.sms:
-          final uri = Uri.parse(data.startsWith('sms:') || data.startsWith('smsto:')
-              ? data.replaceFirst('smsto:', 'sms:')
-              : 'sms:$data');
-          if (await canLaunchUrl(uri)) {
-            await launchUrl(uri);
-          } else {
-            if (context.mounted) {
-              _showSnackBar(context, context.tr('action_sms_error'));
-            }
-          }
+          await _launchSms(context, data);
           break;
 
         case QrType.wifi:
@@ -102,14 +70,136 @@ class ActionHelper {
           break;
 
         case QrType.text:
-          if (context.mounted) {
-            await copyToClipboard(context, data);
+          // Əgər mətndə link varsa, onu açmağa cəhd edirik
+          final urlMatch = RegExp(
+            r'(https?:\/\/[^\s]+|www\.[^\s]+|instagram\.com\/[^\s]+|t\.me\/[^\s]+|[a-zA-Z0-9-]+\.[a-zA-Z]{2,}\/[^\s]*)',
+            caseSensitive: false,
+          ).firstMatch(data);
+
+          if (urlMatch != null) {
+            final foundUrl = urlMatch.group(0)!;
+            await _launchWebOrAppUrl(context, foundUrl);
+          } else {
+            if (context.mounted) {
+              await copyToClipboard(context, data);
+            }
           }
           break;
       }
     } catch (e) {
       if (context.mounted) {
-        _showSnackBar(context, 'Error: $e');
+        _showSnackBar(context, 'Xəta: $e');
+      }
+    }
+  }
+
+  /// Web və ya Tətbiq linklərini (Instagram, WhatsApp, Telegram, Saytlar) etibarlı açır
+  static Future<void> _launchWebOrAppUrl(BuildContext context, String rawUrl) async {
+    var formattedUrl = rawUrl.trim();
+
+    // Əgər protokol yoxdursa (məs: instagram.com/profil və ya www.google.com), https:// əlavə edirik
+    if (!formattedUrl.contains('://')) {
+      formattedUrl = 'https://$formattedUrl';
+    }
+
+    final uri = Uri.tryParse(formattedUrl);
+    if (uri == null) {
+      if (context.mounted) {
+        _showSnackBar(context, context.tr('action_link_error'));
+      }
+      return;
+    }
+
+    // Bloklanan təhlükəli skript protokolları yoxlanılır
+    const dangerousSchemes = {'javascript', 'vbscript', 'data', 'file', 'content'};
+    if (dangerousSchemes.contains(uri.scheme.toLowerCase())) {
+      if (context.mounted) {
+        _showSnackBar(context, context.tr('action_only_https'));
+      }
+      return;
+    }
+
+    bool launched = false;
+
+    // 1-ci cəhd: Xarici tətbiqdə açmaq (Instagram, WhatsApp və ya brauzer)
+    try {
+      launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (_) {}
+
+    // 2-ci cəhd: Platformanın standart rejimində açmaq
+    if (!launched) {
+      try {
+        launched = await launchUrl(uri, mode: LaunchMode.platformDefault);
+      } catch (_) {}
+    }
+
+    // 3-cü cəhd: HTTP/HTTPS linklər üçün daxili brauzerdə açmaq
+    if (!launched && (uri.isScheme('http') || uri.isScheme('https'))) {
+      try {
+        launched = await launchUrl(uri, mode: LaunchMode.inAppBrowserView);
+      } catch (_) {}
+    }
+
+    // 4-cü cəhd: Əgər instagram:// sxemi idisə və Instagram tətbiqi yoxdursa, veb saytını açırıq
+    if (!launched && uri.scheme == 'instagram') {
+      try {
+        final username = uri.queryParameters['username'];
+        final webUri = username != null && username.isNotEmpty
+            ? Uri.parse('https://instagram.com/$username')
+            : Uri.parse('https://instagram.com');
+        launched = await launchUrl(webUri, mode: LaunchMode.externalApplication);
+      } catch (_) {}
+    }
+
+    if (!launched && context.mounted) {
+      _showSnackBar(context, context.tr('action_link_error'));
+    }
+  }
+
+  /// Telefon nömrəsinə zəng etmək
+  static Future<void> _launchPhone(BuildContext context, String phoneData) async {
+    final cleanDigits = phoneData.replaceAll(RegExp(r'[^\d+]'), '');
+    final uri = Uri.parse(cleanDigits.startsWith('tel:') ? cleanDigits : 'tel:$cleanDigits');
+    try {
+      final launched = await launchUrl(uri);
+      if (!launched && context.mounted) {
+        _showSnackBar(context, context.tr('action_call_error'));
+      }
+    } catch (_) {
+      if (context.mounted) {
+        _showSnackBar(context, context.tr('action_call_error'));
+      }
+    }
+  }
+
+  /// Email proqramını açmaq
+  static Future<void> _launchEmail(BuildContext context, String emailData) async {
+    final uri = Uri.parse(emailData.startsWith('mailto:') ? emailData : 'mailto:$emailData');
+    try {
+      final launched = await launchUrl(uri);
+      if (!launched && context.mounted) {
+        _showSnackBar(context, context.tr('action_email_error'));
+      }
+    } catch (_) {
+      if (context.mounted) {
+        _showSnackBar(context, context.tr('action_email_error'));
+      }
+    }
+  }
+
+  /// SMS proqramını açmaq
+  static Future<void> _launchSms(BuildContext context, String smsData) async {
+    final uri = Uri.parse(smsData.startsWith('sms:') || smsData.startsWith('smsto:')
+        ? smsData.replaceFirst('smsto:', 'sms:')
+        : 'sms:$smsData');
+    try {
+      final launched = await launchUrl(uri);
+      if (!launched && context.mounted) {
+        _showSnackBar(context, context.tr('action_sms_error'));
+      }
+    } catch (_) {
+      if (context.mounted) {
+        _showSnackBar(context, context.tr('action_sms_error'));
       }
     }
   }

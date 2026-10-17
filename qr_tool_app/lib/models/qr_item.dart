@@ -2,6 +2,9 @@ enum QrType {
   text,
   url,
   whatsapp,
+  instagram,
+  telegram,
+  youtube,
   wifi,
   email,
   phone,
@@ -29,24 +32,77 @@ class QrItem {
     required this.isScanned,
   });
 
-  // Məlumatın növünü avtomatik təyin etmək üçün köməkçi metod
+  // Məlumatın növünü avtomatik və dəqiq təyin etmək üçün köməkçi metod
   static QrType detectType(String data) {
-    final lower = data.trim().toLowerCase();
+    final trimmed = data.trim();
+    final lower = trimmed.toLowerCase();
+
+    // 1. WhatsApp
     if (lower.startsWith('https://wa.me/') ||
+        lower.startsWith('http://wa.me/') ||
         lower.startsWith('whatsapp://') ||
-        lower.contains('api.whatsapp.com')) {
+        lower.contains('api.whatsapp.com') ||
+        lower.startsWith('wa.me/')) {
       return QrType.whatsapp;
-    } else if (lower.startsWith('http://') || lower.startsWith('https://')) {
-      return QrType.url;
-    } else if (lower.startsWith('wifi:')) {
+    }
+
+    // 2. Instagram
+    if (lower.contains('instagram.com') || lower.startsWith('instagram://')) {
+      return QrType.instagram;
+    }
+
+    // 3. Telegram
+    if (lower.startsWith('https://t.me/') ||
+        lower.startsWith('http://t.me/') ||
+        lower.startsWith('t.me/') ||
+        lower.startsWith('tg://')) {
+      return QrType.telegram;
+    }
+
+    // 4. YouTube
+    if (lower.contains('youtube.com') ||
+        lower.contains('youtu.be') ||
+        lower.startsWith('vnd.youtube:')) {
+      return QrType.youtube;
+    }
+
+    // 5. Wi-Fi
+    if (lower.startsWith('wifi:')) {
       return QrType.wifi;
-    } else if (lower.startsWith('mailto:')) {
+    }
+
+    // 6. Email
+    if (lower.startsWith('mailto:') ||
+        RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$').hasMatch(trimmed)) {
       return QrType.email;
-    } else if (lower.startsWith('tel:')) {
-      return QrType.phone;
-    } else if (lower.startsWith('smsto:') || lower.startsWith('sms:')) {
+    }
+
+    // 7. SMS
+    if (lower.startsWith('smsto:') || lower.startsWith('sms:')) {
       return QrType.sms;
     }
+
+    // 8. Telefon
+    if (lower.startsWith('tel:') ||
+        (RegExp(r'^\+?[0-9\s\-()]{7,18}$').hasMatch(trimmed) &&
+            trimmed.replaceAll(RegExp(r'[^0-9]'), '').length >= 7 &&
+            trimmed.replaceAll(RegExp(r'[^0-9]'), '').length <= 15)) {
+      return QrType.phone;
+    }
+
+    // 9. Ümumi Veb və Tətbiq Linkləri
+    if (lower.startsWith('http://') ||
+        lower.startsWith('https://') ||
+        lower.startsWith('tiktok.com') ||
+        lower.startsWith('facebook.com') ||
+        lower.startsWith('fb.me') ||
+        lower.startsWith('x.com') ||
+        lower.startsWith('twitter.com') ||
+        lower.startsWith('www.') ||
+        RegExp(r'^[a-zA-Z0-9][-a-zA-Z0-9]*\.[a-zA-Z]{2,}(\/.*)?$', caseSensitive: false).hasMatch(trimmed)) {
+      return QrType.url;
+    }
+
     return QrType.text;
   }
 

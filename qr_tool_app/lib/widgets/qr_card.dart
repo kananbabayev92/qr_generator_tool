@@ -26,6 +26,12 @@ class QrCard extends StatelessWidget {
         return Icons.link_rounded;
       case QrType.whatsapp:
         return Icons.chat_rounded;
+      case QrType.instagram:
+        return Icons.camera_alt_rounded;
+      case QrType.telegram:
+        return Icons.send_rounded;
+      case QrType.youtube:
+        return Icons.play_circle_fill_rounded;
       case QrType.wifi:
         return Icons.wifi_rounded;
       case QrType.email:
@@ -46,6 +52,12 @@ class QrCard extends StatelessWidget {
         return context.tr('type_url');
       case QrType.whatsapp:
         return context.tr('type_whatsapp');
+      case QrType.instagram:
+        return context.tr('type_instagram');
+      case QrType.telegram:
+        return context.tr('type_telegram');
+      case QrType.youtube:
+        return context.tr('type_youtube');
       case QrType.wifi:
         return context.tr('type_wifi');
       case QrType.email:
@@ -63,6 +75,12 @@ class QrCard extends StatelessWidget {
     switch (type) {
       case QrType.whatsapp:
         return const Color(0xFF25D366); // WhatsApp yaşılı
+      case QrType.instagram:
+        return const Color(0xFFE1306C); // Instagram çəhrayı/bənövşəyi
+      case QrType.telegram:
+        return const Color(0xFF0088CC); // Telegram mavisi
+      case QrType.youtube:
+        return const Color(0xFFFF0000); // YouTube qırmızı
       case QrType.url:
         return Colors.blueAccent;
       case QrType.wifi:
