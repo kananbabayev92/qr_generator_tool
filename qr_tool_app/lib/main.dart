@@ -79,7 +79,7 @@ class _QrToolAppState extends State<QrToolApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Ontero QR - Generator & Scanner',
+      title: 'QR Code Scanner & Generator',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
